@@ -27,7 +27,7 @@ namespace Labb1_LINQ_SUT25
                 "7.Avsluta");
                 string choice = Console.ReadLine();
                 var parseTest = int.TryParse(choice, out int answer);
-                if (!parseTest||answer>7||answer<1)
+                if (!parseTest || answer > 7 || answer < 1)
                 {
                     Console.Clear();
                     Console.WriteLine("Välj ett nummer mellan 1 och 7");
@@ -44,11 +44,15 @@ namespace Labb1_LINQ_SUT25
                             break;
                         case 2:
                             Console.Clear();
-                            //metod2
+                            SecondQuery(context);
+                            Console.WriteLine("Tryck valfri tangent för att fortsätta...");
+                            Console.ReadKey();
                             break;
                         case 3:
                             Console.Clear();
-                            //metod 3
+                            ThirdQuery(context);
+                            Console.WriteLine("Tryck valfri tangent för att fortsätta...");
+                            Console.ReadKey();
                             break;
                         case 4:
                             Console.Clear();
@@ -73,7 +77,7 @@ namespace Labb1_LINQ_SUT25
 
             }
             while (mainMenu == true);
-            
+
         }
 
         //Hämta alla produkter i kategorin \"Electronics\" och sortera dem efter pris (högst först)
@@ -85,11 +89,71 @@ namespace Labb1_LINQ_SUT25
                 .OrderByDescending(p => p.Price)
                 .ToList();
 
-            foreach(var product in result)
+            foreach (var product in result)
             {
                 Console.WriteLine($"Produkt:{product.Name} Pris:{product.Price}");
             }
-           
+
+
+        }
+
+        //Lista alla leverantörer som har produkter med ett lagersaldo under 10 enheter
+        //public static void SecondQuery(ShopContext context)
+        //{
+        //    var result = context.Products
+        //        .Where(p => p.StockQuantity < 10)
+        //        .Select(s => s.Supplier.Name)
+        //        .Distinct().ToList();//Distint gör så att ingen leverantör läggs in dubbelt.
+
+        //    foreach (var supplier in result)
+        //    {
+
+        //        Console.WriteLine($"Leverantör: {supplier}");
+
+        //    }
+        //}
+
+        //Lade till så man ser produkterna också
+        public static void SecondQuery(ShopContext context)
+        {
+            var result = context.Products
+                .Where(p => p.StockQuantity < 10).GroupBy(p => p.Supplier.Name).ToList();
+
+            foreach (var supplier in result)
+            {
+
+                Console.WriteLine($"Leverantör: {supplier.Key}");
+                Console.WriteLine("Produkter:\n");
+                foreach (var p in supplier)
+                {
+                    Console.WriteLine("-"+p.Name);
+                }
+                Console.WriteLine("");
+
+
+            }
+
+
+        }
+
+
+        //3.Beräkna det totala ordervärdet för alla ordrar gjorda under den senaste månaden
+        public static void ThirdQuery(ShopContext context)
+        {
+            var result = context.Orders.Where(o => o.OrderDate > (DateTime.Now.AddMonths(-1)))
+                .Select(o => o.TotalAmount)
+                .ToList();
+            var grandTotal=0;
+            foreach(var ordertotal in result)
+            {
+                grandTotal=grandTotal+ordertotal;
+            }//finns tydligen en "sum" funktion som gör att man slipper loopa...
+            Console.WriteLine($"Total försäljning senaste månaden:{grandTotal}Kr");
+        }
+
+        //4.Hitta de 3 mest sålda produkterna baserat på OrderDetail-data
+        public static void FourthQuery(ShopContext context)
+        {
             
         }
     }
