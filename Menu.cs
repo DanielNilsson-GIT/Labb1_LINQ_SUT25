@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -56,7 +57,9 @@ namespace Labb1_LINQ_SUT25
                             break;
                         case 4:
                             Console.Clear();
-                            //metod 4
+                            FourthQuery(context);
+                            Console.WriteLine("Tryck valfri tangent för att fortsätta...");
+                            Console.ReadKey();
                             break;
                         case 5:
                             Console.Clear();
@@ -126,7 +129,7 @@ namespace Labb1_LINQ_SUT25
                 Console.WriteLine("Produkter:\n");
                 foreach (var p in supplier)
                 {
-                    Console.WriteLine("-"+p.Name);
+                    Console.WriteLine("-" + p.Name);
                 }
                 Console.WriteLine("");
 
@@ -143,10 +146,10 @@ namespace Labb1_LINQ_SUT25
             var result = context.Orders.Where(o => o.OrderDate > (DateTime.Now.AddMonths(-1)))
                 .Select(o => o.TotalAmount)
                 .ToList();
-            var grandTotal=0;
-            foreach(var ordertotal in result)
+            var grandTotal = 0;
+            foreach (var ordertotal in result)
             {
-                grandTotal=grandTotal+ordertotal;
+                grandTotal = grandTotal + ordertotal;
             }//finns tydligen en "sum" funktion som gör att man slipper loopa...
             Console.WriteLine($"Total försäljning senaste månaden:{grandTotal}Kr");
         }
@@ -154,7 +157,34 @@ namespace Labb1_LINQ_SUT25
         //4.Hitta de 3 mest sålda produkterna baserat på OrderDetail-data
         public static void FourthQuery(ShopContext context)
         {
-            
+
+            var products = context.OrderDetails.Select(od => new
+            {
+                kvantitet = od.Quantity,
+                produktnamn = od.Product.Name
+            }).GroupBy(group => group.produktnamn)
+            .Select(finalresult => new
+            {
+                produkt = finalresult.Key,
+                antalSålda = finalresult.Sum(summa => summa.kvantitet)//måste göra en select för att kunna sortera på orderbydesc
+
+            }).OrderByDescending(summa => summa.antalSålda).ToList();
+
+
+            int counter = 0;
+            foreach (var x in products)
+            {
+                if (counter == 3)
+                {
+                    break;
+                }
+                Console.WriteLine("Populäraste produkter:\n");
+                Console.WriteLine($"Produkt:{x.produkt}");
+                Console.WriteLine($"Sålt antal: {x.antalSålda}");
+                counter++;
+
+            }
+
         }
     }
 }
