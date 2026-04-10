@@ -67,10 +67,12 @@ namespace Labb1_LINQ_SUT25
                             FithtQuery(context);
                             Console.WriteLine("Tryck valfri tangent för att fortsätta...");
                             Console.ReadKey();
-                            break; 
+                            break;
                         case 6:
                             Console.Clear();
-                            //metod 6
+                            SixthQueary(context);
+                            Console.WriteLine("Tryck valfri tangent för att fortsätta...");
+                            Console.ReadKey();
                             break;
                         case 7:
                             Console.Clear();
@@ -173,10 +175,10 @@ namespace Labb1_LINQ_SUT25
             Console.WriteLine("Populäraste produkter:\n");
             foreach (var x in products)
             {
-              
+
                 Console.WriteLine($"Produkt:{x.produkt}");
                 Console.WriteLine($"Sålt antal: {x.antalSålda}");
-              
+
 
             }
 
@@ -185,7 +187,8 @@ namespace Labb1_LINQ_SUT25
         //5.Lista alla kategorier och antalet produkter i varje kategori
         public static void FithtQuery(ShopContext context)
         {
-            var result = context.Products.GroupBy(p => p.Category).Select(x => new {
+            var result = context.Products.GroupBy(p => p.Category).Select(x => new
+            {
 
                 //måste plocka ut värderna från group "GroupBy ger dig "högar" av data – Select gör dem mätbara."
                 Kategori = x.Key.Name,
@@ -193,17 +196,53 @@ namespace Labb1_LINQ_SUT25
 
             }).ToList();
 
-            foreach(var produkt in result)
+            foreach (var produkt in result)
             {
                 Console.WriteLine($"{produkt.Kategori} \nAntal produkter:{produkt.AntalProdukter}");
                 Console.WriteLine();
             }
-            
+
         }
 
-        public static void SixthQueary()
+        //Hämta alla ordrar med tillhörande kunduppgifter och orderdetaljer där totalbeloppet överstiger 1000 kr
+        public static void SixthQueary(ShopContext context)
         {
+            var result = context.OrderDetails.Where(oi => oi.Order.TotalAmount > 1000)
+                .Select(oi => new
+                {
+                    Beställningsdatum = oi.Order.OrderDate,
+                    Ordervärde = oi.Order.TotalAmount,
+                    Kund = oi.Order.Customer.Name,
+                    Email = oi.Order.Customer.Email,
+                    Telefon = oi.Order.Customer.Phone,
+                    Adress = oi.Order.Customer.Address,
+                    OrderId = oi.Order.Id,
+                    Produkter = oi.Product.Name,
+                    styckpris = oi.UnitPrice,
+                    kvantitet = oi.Quantity
 
+                }).GroupBy(oi => oi.OrderId).ToList();
+
+            foreach (var x in result)
+            {
+                Console.WriteLine($"Order:{x.Key}");
+                Console.WriteLine($"Beställningsdatum: {x.FirstOrDefault().Beställningsdatum}\n");
+                Console.WriteLine("Kunduppgifter:");
+                Console.WriteLine($"Namn: {x.FirstOrDefault().Kund}");
+                Console.WriteLine($"Telefon:{x.FirstOrDefault().Telefon}\nAdress:{x.FirstOrDefault().Adress}\nEmail:{x.FirstOrDefault().Email}");
+                Console.WriteLine("Produkter:");
+                decimal grandtotal = 0;
+                //firstordefault pga annars skrivs vissa personer ut flera gånger. 
+                foreach (var detail in x)
+                {
+                    Console.WriteLine(detail.Produkter + " " +
+                    $"{detail.styckpris}Kr");
+                    grandtotal = grandtotal + detail.styckpris;
+                }
+                Console.WriteLine("Totalt Ordervärde: " + grandtotal +"Kr");
+                Console.WriteLine();
+
+            }
         }
     }
 }
