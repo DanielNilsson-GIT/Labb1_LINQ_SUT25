@@ -25,6 +25,16 @@ namespace Labb1_LINQ_SUT25
 
         public DbSet<Supplier> Suppliers { get; set; }
 
+        //Förklaring från chatten kring migrations:
+        //Git:
+
+        //👉 sparar din kodhistorik
+
+        //EF Migration:
+
+        //👉 sparar din databashistorik
+
+
 
         //Lägga till Seeddata
 
