@@ -1,5 +1,6 @@
 ﻿using Microsoft.Identity.Client;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
@@ -63,8 +64,10 @@ namespace Labb1_LINQ_SUT25
                             break;
                         case 5:
                             Console.Clear();
-                            //metod 5
-                            break;
+                            FithtQuery(context);
+                            Console.WriteLine("Tryck valfri tangent för att fortsätta...");
+                            Console.ReadKey();
+                            break; 
                         case 6:
                             Console.Clear();
                             //metod 6
@@ -158,32 +161,48 @@ namespace Labb1_LINQ_SUT25
         public static void FourthQuery(ShopContext context)
         {
 
-            var products = context.OrderDetails.Select(od => new
-            {
-                kvantitet = od.Quantity,
-                produktnamn = od.Product.Name
-            }).GroupBy(group => group.produktnamn)
+            var products = context.OrderDetails.GroupBy(group => group.Product.Name)
             .Select(finalresult => new
             {
                 produkt = finalresult.Key,
-                antalSålda = finalresult.Sum(summa => summa.kvantitet)//måste göra en select för att kunna sortera på orderbydesc
+                antalSålda = finalresult.Sum(summa => summa.Quantity)// måste göra Select för att skapa antalSålda (summa) som vi sedan kan sortera på
 
-            }).OrderByDescending(summa => summa.antalSålda).ToList();
+            }).OrderByDescending(summa => summa.antalSålda).Take(3).ToList();//Take väljer ut specifikt antal
 
 
-            int counter = 0;
+            Console.WriteLine("Populäraste produkter:\n");
             foreach (var x in products)
             {
-                if (counter == 3)
-                {
-                    break;
-                }
-                Console.WriteLine("Populäraste produkter:\n");
+              
                 Console.WriteLine($"Produkt:{x.produkt}");
                 Console.WriteLine($"Sålt antal: {x.antalSålda}");
-                counter++;
+              
 
             }
+
+        }
+
+        //5.Lista alla kategorier och antalet produkter i varje kategori
+        public static void FithtQuery(ShopContext context)
+        {
+            var result = context.Products.GroupBy(p => p.Category).Select(x => new {
+
+                //måste plocka ut värderna från group "GroupBy ger dig "högar" av data – Select gör dem mätbara."
+                Kategori = x.Key.Name,
+                AntalProdukter = x.Count()
+
+            }).ToList();
+
+            foreach(var produkt in result)
+            {
+                Console.WriteLine($"{produkt.Kategori} \nAntal produkter:{produkt.AntalProdukter}");
+                Console.WriteLine();
+            }
+            
+        }
+
+        public static void SixthQueary()
+        {
 
         }
     }
